@@ -26,7 +26,8 @@
     },
     "testEnvironment": "node",
     "testPathDirs": [
-      "transforms"
+      "transforms",
+      "myTransforms"
     ]
   },
   "devDependencies": {
