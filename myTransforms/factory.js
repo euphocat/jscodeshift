@@ -1,7 +1,4 @@
-const types = require('ast-types');
-const b = types.builders;
-
-module.exports = function (file, api) {
+module.exports = function(file, api) {
   const { jscodeshift } = api;
   const { statement, statements } = jscodeshift.template;
 
@@ -45,6 +42,7 @@ module.exports = function (file, api) {
    * Move `module.exports` to `export default`
    */
   function exportsToDefault(p) {
+    // remove arguments
     const right = {
       ...p.value.right,
       params: []
@@ -65,7 +63,7 @@ module.exports = function (file, api) {
     }
   });
 
-  function isHavingUseStrict() {
+  function hasUseStrict() {
     const firstPath = root
       .find(jscodeshift.Program)
       .get('body')
@@ -79,7 +77,7 @@ module.exports = function (file, api) {
     const firstPath = root
       .find(jscodeshift.Program)
       .get('body')
-      .get(isHavingUseStrict() ? 1 : 0);
+      .get(hasUseStrict() ? 1 : 0);
 
     jscodeshift(firstPath)
       .replaceWith(applyCommentsToStatements(statements`
@@ -99,13 +97,7 @@ module.exports = function (file, api) {
     .filter(p => p.parentPath.parentPath.name === 'body')
     .forEach(exportsToDefault);
 
-  const outputOptions = {
+  return root.toSource({
     quote: 'single'
-  };
-
-  return root
-  /*.find(jscodeshift.Literal)
-  .filter((l) => l.value.rawValue === 'use strict')
-  .remove()*/
-    .toSource(outputOptions);
+  });
 };
