@@ -1,4 +1,4 @@
-module.exports = function(file, api) {
+module.exports = function (file, api) {
   const { jscodeshift } = api;
   const { statement, statements } = jscodeshift.template;
 
@@ -38,6 +38,16 @@ module.exports = function(file, api) {
     return node;
   }
 
+  function hasUseStrict(root) {
+    const firstPath = root
+      .find(jscodeshift.Program)
+      .get('body')
+      .get(0);
+
+    return jscodeshift.ExpressionStatement.check(firstPath.value) &&
+      firstPath.value.expression.rawValue === 'use strict';
+  }
+
   /**
    * Move `module.exports` to `export default`
    */
@@ -54,30 +64,36 @@ module.exports = function(file, api) {
 
   const root = jscodeshift(file.source);
 
-  let hasReact = false;
-  root.find(jscodeshift.ImportDeclaration).forEach(im => {
-    const importAs = im.value.original.specifiers.filter(s => s.local.name === 'React');
+  root
+    .find(jscodeshift.VariableDeclaration, {
+      declarations: [
+        {
+          id: {
+            name: 'React'
+          }
+        }
+      ]
+    })
+    .filter(p => p.parentPath.name === 'body')
+    .replaceWith(statements`
+        import React from 'react';
+    `);
 
-    if (importAs.length === 1 && im.value.original.source.rawValue === 'react') {
-      hasReact = true;
-    }
-  });
+  const hasReactImport = root
+    .find(jscodeshift.ImportDeclaration, {
+      original: {
+        source: {
+          rawValue: 'react'
+        }
+      }
+    })
+    .size() > 0;
 
-  function hasUseStrict() {
+  if (!hasReactImport) {
     const firstPath = root
       .find(jscodeshift.Program)
       .get('body')
-      .get(0);
-
-    return jscodeshift.ExpressionStatement.check(firstPath.value) &&
-      firstPath.value.expression.rawValue === 'use strict';
-  }
-
-  if (!hasReact) {
-    const firstPath = root
-      .find(jscodeshift.Program)
-      .get('body')
-      .get(hasUseStrict() ? 1 : 0);
+      .get(hasUseStrict(root) ? 1 : 0);
 
     jscodeshift(firstPath)
       .replaceWith(applyCommentsToStatements(statements`
