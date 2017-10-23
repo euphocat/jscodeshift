@@ -1,3 +1,6 @@
 const defineTest = require('jscodeshift/dist/testUtils').defineTest;
 
-defineTest(__dirname, 'factory', null, 'factory/factory');
+describe('factory', () => {
+  defineTest(__dirname, 'factory', null, 'factory/factory');
+  defineTest(__dirname, 'factory', null, 'factory/factoryWithoutUseStrict');
+});

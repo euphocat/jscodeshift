@@ -1,31 +1,33 @@
+/**
+ * We should keep this comment
+ */
 'use strict';
 
-module.exports = function(React) {
+module.exports = function (React) {
 
-    const CLASSNAMES = {
-        container: 'actionsList'
-    };
+  const CLASSNAMES = {
+    container: 'actionsList'
+  };
 
-    /**
-     * Actions list
-     * This component is used to display actions
-     */
-    return React.createClass({
-        displayName: 'ActionsList',
+  /**
+   * Actions list
+   * This component is used to display actions
+   */
+  return React.createClass({
+    displayName: 'ActionsList',
 
-        statics: {
-            CLASSNAMES
-        },
+    statics: {
+      CLASSNAMES
+    },
 
-        render() {
-            const {children} = this.props;
+    render() {
+      const { children } = this.props;
 
-            return (
-                <div className={CLASSNAMES.container}>
-                {children}
-                </div>
-            );
-        }
-
-    });
+      return (
+        <div className={CLASSNAMES.container}>
+          {children}
+        </div>
+      );
+    }
+  });
 };
